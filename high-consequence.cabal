@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c5296ba391edec9105390acae19ed6109b0321b825d9b6663c3c0df1c1f07d6f
+-- hash: bea8da68253c7af36d34e334785daba2e0fab93aca6a7d2d7d4348aefed5226b
 
 name:           high-consequence
 version:        0.1.0.0
@@ -27,13 +27,18 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Consequence
+      Consequence.Relation
+      Consequence.RProxy
+      Util
   other-modules:
       Paths_high_consequence
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , row-types
+    , text
   default-language: Haskell2010
 
 executable high-consequence-exe
@@ -46,6 +51,8 @@ executable high-consequence-exe
   build-depends:
       base >=4.7 && <5
     , high-consequence
+    , row-types
+    , text
   default-language: Haskell2010
 
 test-suite high-consequence-test
@@ -59,4 +66,6 @@ test-suite high-consequence-test
   build-depends:
       base >=4.7 && <5
     , high-consequence
+    , row-types
+    , text
   default-language: Haskell2010

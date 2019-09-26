@@ -3,7 +3,21 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    cabal-file:
+      size: 3283
+      sha256: a2d26ef268d38e76b82504e564ba771c0d03793e5452d05660e60803ae45d086
+    name: row-types
+    version: 0.3.0.0
+    git: https://github.com/target/row-types.git
+    pantry-tree:
+      size: 1164
+      sha256: 0adaacd892c346bfe8cac3a9bce51824e70b53e3ac4d43d4665e1e296cc50570
+    commit: c2fbd6e04cff855e5003c8e6409ee8e8ff28da37
+  original:
+    git: https://github.com/target/row-types.git
+    commit: c2fbd6e04cff855e5003c8e6409ee8e8ff28da37
 snapshots:
 - completed:
     size: 523700
