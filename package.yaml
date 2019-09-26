@@ -1,0 +1,48 @@
+name:                high-consequence
+version:             0.1.0.0
+github:              "ajnsit/high-consequence"
+license:             BSD3
+author:              "Anupam Jain"
+maintainer:          "ajnsit@gmail.com"
+copyright:           "2019 Anupam Jain"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/ajnsit/high-consequence#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+
+executables:
+  high-consequence-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - high-consequence
+
+tests:
+  high-consequence-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - high-consequence
