@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bea8da68253c7af36d34e334785daba2e0fab93aca6a7d2d7d4348aefed5226b
+-- hash: a487e1f76596ac768f23c16e55d0da90b244495edfe93d11a21e0bc3a15c05da
 
 name:           high-consequence
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Consequence
+      Consequence.Primitives
       Consequence.Relation
       Consequence.RProxy
       Util

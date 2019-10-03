@@ -13,7 +13,7 @@
 
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
-module Consequence.Relation (Relation(..), PivotedRelation) where
+module Consequence.Relation (Relation(..), PivotedRelation, heroQuery) where
 
 import Data.Row
 import qualified Data.Row.Internal as RInternal
@@ -79,6 +79,10 @@ data Relation (isPivot :: Bool) (r :: Row *) where
   --- Row Ops --------------------------------
 
   Filter
+    -- This function needs to be compiled to SQL
+    -- It's perhaps more appropriate to have a small
+    -- DSL here as well for Ops
+    --   Op (Rec r) Bool
     :: (Rec r -> Bool)
     -> Relation b r
     -> Relation b r
@@ -367,3 +371,81 @@ randomSample = personTable
   |> Join @("name" .== String) personTable
   |> RenameField #age #age1
   |> Project @("name" .== String)
+
+
+-- GraphQL Star Wars examples
+-- query Hero($episode: Episode, $withFriends: Boolean!) {
+--   hero(episode: $episode) {
+--     name
+--     appearsIn
+--     friends @include(if: $withFriends) {
+--       name
+--     }
+--   }
+-- }
+
+-- Equivalent HC Query
+-- Seems quite a bit bigger, but includes complete informatio on how to get data
+-- Also, the GraphQL query seems unclear, does `appearsIn` contain movies apart from the $episode?
+heroQuery :: String -> Bool -> Relation 'False OutputTableRow
+heroQuery episode withFriends = heroMovieInformation |> addHeroFriendInformation
+  where
+    -- All hero ids which appear in supplied episode
+    heroesThatAppearInThisEpisode = heroTable
+      |> Join @("heroId" .== Int) movieAppearenceTable
+      |> Join @("movieId" .== Int)
+              (movieTable |> RenameField #name #appearsIn)
+      |> Filter (\r -> r .! #appearsIn == episode)
+      |> Project @("heroId" .== Int .+ "name" .== String)
+    -- Get movie information for ids
+    heroMovieInformation = heroesThatAppearInThisEpisode
+      |> Join @("heroId" .== Int) movieAppearenceTable
+      |> Join @("movieId" .== Int)
+              (movieTable |> RenameField #name #appearsIn)
+      |> Group (RP @("movieId" .== Int .+ "appearsIn" .== String)) #movieDetails
+    -- Get friend information for ids
+    addHeroFriendInformation h
+      | withFriends = h
+          |> Join @("heroId" .== Int) friendTable
+          |> Join @("friendId" .== Int)
+                  (heroTable |> RenameField #heroId #friendId
+                            |> RenameField #name #friendName)
+          |> Group (RP @("friendId" .== Int .+ "friendName" .== String)) #friendDetails
+      | otherwise = h |> AddField #friendDetails (const Empty)
+
+-- Types needed for this query follow
+type HeroRow =
+  (  "name" .== String
+  .+ "heroId" .== Int
+  )
+
+type MovieRow =
+  (  "movieId" .== Int
+  .+ "name" .== String
+  )
+
+type MovieAppearenceRow =
+  (  "heroId" .== Int
+  .+ "movieId" .== Int
+  )
+
+type FriendRow =
+  (  "heroId" .== Int
+  .+ "friendId" .== Int
+  )
+
+heroTable :: Relation 'False HeroRow
+heroTable = DBBackedTable "heroes"
+
+movieTable :: Relation 'False MovieRow
+movieTable = DBBackedTable "movies"
+
+movieAppearenceTable :: Relation 'False MovieAppearenceRow
+movieAppearenceTable = DBBackedTable "movieAppearences"
+
+friendTable :: Relation 'False FriendRow
+friendTable = DBBackedTable "friends"
+
+type MovieDetailsRow = ("movieId" .== Int .+ "appearsIn" .== String)
+type FriendDetailsRow = ("friendId" .== Int .+ "friendName" .== String)
+type OutputTableRow = ("heroId" .== Int .+ "name" .== String .+ "friendDetails" .== Relation 'False FriendDetailsRow .+ "movieDetails" .== Relation 'False MovieDetailsRow)
